@@ -1,0 +1,54 @@
+---
+name: builds
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - name: check-relevant-changes
+        id: filter
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FILES=$(gh pr view ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --json files --jq '.files[].path')
+          if echo "$FILES" | grep -iqE '^(tasks/|\.build/|\.config/|nuget\.config$)'; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No relevant files changed, skipping build"
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  BuildTestAndCheck:
+    needs: check-changes
+    if: needs.check-changes.outputs.relevant == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      # Step 1: Checkout the repo
+      - name: checkout-module
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          path: PSBuildTasks
+      # Step 2: Run the build script
+      - name: run-build-script
+        shell: pwsh
+        run: |
+            ./PSBuildTasks/.build/build.ps1 `
+              -GitHubRepoName 'PSBuildTasks' `
+              -BranchName $env:GITHUB_REF `
+              -Build 'BuildTestAndCheck' `
+              -Verbose

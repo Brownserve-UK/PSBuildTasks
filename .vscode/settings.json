@@ -1,0 +1,48 @@
+{
+  "cSpell.language": "en,en-GB",
+  "cSpell.words": [
+    "Brownserve",
+    "paket",
+    "Teamcity",
+    "TMPDIR",
+    "Choco",
+    "CICD",
+    "dedupe",
+    "devcontainer",
+    "mrkdwn",
+    "nugetconfig",
+    "nupkg",
+    "yzhang",
+    "Allman",
+    "Cmdlets",
+    "Dont",
+    "hashtable",
+    "hashtables",
+    "imatch",
+    "LASTEXITCODE",
+    "MAML",
+    "Mddhhmm",
+    "notcontains",
+    "notlike",
+    "notmatch",
+    "pscustomobject",
+    "PSGALLERY",
+    "PSMODULE",
+    "psobject",
+    "pstools",
+    "pwsh"
+  ],
+  "markdown.extension.toc.omittedFromToc": {
+    "README.md": [
+      "# Overview"
+    ]
+  },
+  "markdown.extension.toc.updateOnSave": false,
+  "powershell.codeFormatting.autoCorrectAliases": true,
+  "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationAfterEveryPipeline",
+  "powershell.codeFormatting.preset": "Allman",
+  "powershell.codeFormatting.trimWhitespaceAroundPipe": true,
+  "powershell.codeFormatting.useConstantStrings": true,
+  "powershell.codeFormatting.useCorrectCasing": true,
+  "powershell.helpCompletion": "Disabled"
+}
