@@ -62,6 +62,102 @@ Parameters:
 | `NugetFeedApiKey` | If `nuget` is in `PublishTo` | API key for nuget.org |
 | `CustomNugetFeeds` | If `CustomNugetFeeds` is in `PublishTo` | Array of hashtables with `Name`, `Url` and `Credential` |
 
+### PowerShellModule.tasks.ps1
+
+Builds, documents and releases a Brownserve PowerShell module. Attaches its manifest build to `Build`,
+its documentation regeneration to `Stage` (and, via `CreateModuleHelp`, ahead of the generic `Tests`
+task, regardless of dot-source order), and its publishers to `Publish`. Ships its own NuGet packaging
+tasks under distinct names; it does not reuse `NuGetPackage.tasks.ps1`. Also defines the convenience
+targets `BuildAndImport` and `BuildWithDocs`.
+
+Parameters:
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `ModuleName` | Yes | The name of the PowerShell module being built |
+| `ModuleGUID` | Yes | The GUID of the module |
+| `ModuleDescription` | Yes | The description of the module |
+| `ModuleAuthor` | No (defaults to `Brownserve UK`) | The author of the module |
+| `ModuleTags` | No (defaults to `brownserve-UK`) | Tags applied to the module |
+| `PublishTo` | No | Any of `nuget`, `PSGallery`, `GitHub`, `CustomNugetFeeds` |
+| `GitHubRepoOwner` | Yes | GitHub organisation/account |
+| `GitHubRepoName` | No (defaults to `$Global:BrownserveRepoName`) | GitHub repository name |
+| `GitHubReleaseToken` | If `GitHub` is in `PublishTo` | PAT used to upload release assets |
+| `NugetFeedApiKey` | If `nuget` is in `PublishTo` | API key for nuget.org |
+| `PSGalleryAPIKey` | If `PSGallery` is in `PublishTo` | API key for the PowerShell Gallery |
+| `CustomNugetFeeds` | If `CustomNugetFeeds` is in `PublishTo` | Array of hashtables with `Name`, `Url`, `Credential` and `PublishAs` (`NugetPackage` or `ModulePackage`) |
+| `UseWorkingCopy` | No | Loads the working copy of the module from the module directory instead of the stable version restored by `_init.ps1` |
+
+### RustBinary.tasks.ps1
+
+Builds, tests, packages and releases a Rust binary. Attaches `cargo build` to `Build`, `cargo test` to
+`Test`, archiving to `Package`, and uploading release archives to `Publish`. Defines the public dotted
+targets `RustBinary.Check` (build, test and the Pester binary smoke tests) and `RustBinary.Package`
+(build and archive for a single `-Target`), used directly by CI matrix jobs.
+
+Supports a collector mode: when `-ArchiveSourceDirectory` is supplied, no `cargo` commands are invoked.
+Instead the archives already built by the `RustBinary.Package` matrix jobs are copied into the build
+output directory and uploaded to the draft GitHub release, so a Linux job with no Rust toolchain can run
+`Release`.
+
+Parameters:
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `BinaryName` | No (defaults to `$Global:BrownserveRepoName`) | The name of the binary to build and package (without extension) |
+| `Target` | No | The Rust target triple to build for, used by `RustBinary.Package`. Defaults to the host target |
+| `Targets` | If `GitHub` is in `PublishTo` | Every target triple being released, used to determine the archive names expected on the release |
+| `ArchiveSourceDirectory` | No | Directory of pre-built archives to copy into the build output directory and publish. Enables collector mode |
+| `PublishTo` | No | Only `GitHub` |
+| `GitHubRepoOwner` | Yes | GitHub organisation/account |
+| `GitHubRepoName` | No (defaults to `$Global:BrownserveRepoName`) | GitHub repository name |
+| `GitHubReleaseToken` | If `GitHub` is in `PublishTo` | PAT used to upload release archives |
+
+### ContainerImage.tasks.ps1
+
+Builds and publishes a Docker container image. Attaches the image build to `Build` and publishing to
+`Publish`. Defines the public dotted target `ContainerImage.Check` (build the image and run its Pester
+checks, without pushing).
+
+Parameters:
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `ImageName` | No (defaults to `$Global:BrownserveRepoName`) | The Docker image name (without tag), lower-cased automatically |
+| `DockerContextPath` | No (defaults to `.`) | Path (relative to the repository root) to the directory containing the Dockerfile and its build context |
+| `PublishTo` | No | Any of `DockerHub`, `GHCR` |
+| `GitHubRepoOwner` | Yes | GitHub organisation/account, used to build the GHCR image path |
+| `DockerHubUsername` | If `DockerHub` is in `PublishTo` | DockerHub username |
+| `DockerHubToken` | If `DockerHub` is in `PublishTo` | DockerHub access token |
+| `GHCRToken` | If `GHCR` is in `PublishTo` | Token for GitHub Container Registry, needs `packages:write` |
+
+### DirectoryArchive.tasks.ps1
+
+Zips a directory and publishes it as a GitHub release asset. Attaches archiving to `Package` and
+uploading to `Publish`.
+
+Parameters:
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `Path` | Yes | The directory to archive, relative to the repository root or absolute |
+| `ArchiveName` | Yes | The base name of the archive, e.g. `skills` produces `skills-v1.2.3.zip` |
+| `PublishTo` | No | Only `GitHub` |
+| `GitHubRepoOwner` | Yes | GitHub organisation/account |
+| `GitHubRepoName` | No (defaults to `$Global:BrownserveRepoName`) | GitHub repository name |
+| `GitHubReleaseToken` | If `GitHub` is in `PublishTo` | PAT used to upload the archive as a release asset |
+
+### AstroDocs.tasks.ps1
+
+Builds an Astro documentation site with `npm ci` and `npm run build`. Attaches to `Build`. Deployment of
+the built site is handled by a separate `deploy-docs` workflow, not by this file.
+
+Parameters:
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `DocsDirectory` | No (defaults to `pages`) | The directory (relative to the repository root) containing the Astro site |
+
 ## Anchors
 
 `ReleaseLifecycle.tasks.ps1` defines a fixed set of empty anchor tasks that component task files attach
@@ -106,6 +202,7 @@ task file is dot-sourced into the same script scope):
 | `$Global:BuildVersion` | `SetVersion` | The NuGet-compatible version string used across every publisher |
 | `$script:ReleaseResponse` | `CreateDraftRelease` | The GitHub API response for the draft release (`.id`, `.upload_url`, `.assets`, ...) |
 | `$script:ExpectedReleaseAssets` | Initialised by `ReleaseLifecycle.tasks.ps1`, appended to by publisher tasks | Asset file names `FinaliseRelease` requires to be present before publishing the release |
+| `$Global:BrownserveRustBinaryPath` | `RustBinary.tasks.ps1`'s `CargoBuild` | The path to the compiled binary, unset in collector mode. Binary smoke tests skip when it's unset and fail when it's set but the file is missing |
 
 A shared retry helper, `Invoke-BrownserveRetry`, is also defined by `ReleaseLifecycle.tasks.ps1`. Publisher
 tasks route their network calls through it: transient failures (timeouts, HTTP 5xx, rate limiting, honouring
