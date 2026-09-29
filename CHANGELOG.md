@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.2.1](https://github.com/Brownserve-UK/PSBuildTasks/tree/v0.2.1) (2026-09-29)
+
+### Fixed
+
+- fix: fail scoped check targets when the build leaves uncommitted changes in [#7](https://github.com/Brownserve-UK/PSBuildTasks/pull/7) by [@shoddyguard](https://github.com/shoddyguard)
+
+
 ## [v0.2.0](https://github.com/Brownserve-UK/PSBuildTasks/tree/v0.2.0) (2026-09-28)
 
 ### Added
