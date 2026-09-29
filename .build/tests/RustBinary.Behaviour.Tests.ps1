@@ -119,6 +119,11 @@ Describe 'RustBinary build behaviour' {
         $Global:RBCargoCalls | Where-Object { $_ -contains 'test' } | Should -Not -BeNullOrEmpty
     }
 
+    It 'RustBinary.Check fails when the build leaves uncommitted changes' {
+        Mock -CommandName Get-GitChanges -MockWith { return [PSCustomObject]@{ Source = 'Cargo.lock' } }
+        { Invoke-Build 'RustBinary.Check' -File $script:TaskFile -BinaryName 'testbin' } | Should -Throw '*uncommitted changes*'
+    }
+
     Context 'collector mode' {
         BeforeEach {
             New-Item -Path $script:CollectorDir -ItemType Directory -Force | Out-Null

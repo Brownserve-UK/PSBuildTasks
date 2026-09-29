@@ -61,6 +61,11 @@ Describe 'ContainerImage build behaviour' {
         $PushCalls.Count | Should -Be 0
     }
 
+    It 'ContainerImage.Check fails when the build leaves uncommitted changes' {
+        Mock -CommandName Get-GitChanges -MockWith { return [PSCustomObject]@{ Source = 'image/Dockerfile' } }
+        { Invoke-Build ContainerImage.Check -File $script:TaskFile } | Should -Throw '*uncommitted changes*'
+    }
+
     It 'Release pushes the version tag and latest to each configured registry' {
         $BuildParams = Get-CICommonBuildParams
         Invoke-Build Release @BuildParams | Out-Null

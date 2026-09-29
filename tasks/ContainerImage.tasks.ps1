@@ -170,6 +170,7 @@ task PublishContainerImage CheckContainerPublishingParameters, BuildImage, SetVe
     Public target: build the image and run its Pester checks, without pushing anything.
 .DESCRIPTION
     Used directly by CI for pull request validation. The Pester checks (e.g. container starts, is still
-    running after startup) key off $Global:BrownserveRepoDockerImageName.
+    running after startup) key off $Global:BrownserveRepoDockerImageName. Fails if the build left
+    uncommitted changes behind.
 #>
-task ContainerImage.Check BuildImage, Tests, {}
+task ContainerImage.Check BuildImage, Tests, CheckForUncommittedChanges, {}

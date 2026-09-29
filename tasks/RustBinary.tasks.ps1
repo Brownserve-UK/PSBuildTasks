@@ -301,9 +301,10 @@ task PublishBinaryReleaseAssets CheckRustPublishingParameters, CreateDraftReleas
     Public target: build, test and archive check for one target triple.
 .DESCRIPTION
     Runs the Cargo build, the Cargo test suite and the Pester smoke tests (which key off
-    $Global:BrownserveRustBinaryPath). Used directly by CI for pull request validation.
+    $Global:BrownserveRustBinaryPath), then fails if the build left uncommitted changes behind.
+    Used directly by CI for pull request validation.
 #>
-task RustBinary.Check CargoBuild, CargoTest, Tests, {}
+task RustBinary.Check CargoBuild, CargoTest, Tests, CheckForUncommittedChanges, {}
 
 <#
 .SYNOPSIS

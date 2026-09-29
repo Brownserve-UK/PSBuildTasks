@@ -92,8 +92,8 @@ Parameters:
 
 Builds, tests, packages and releases a Rust binary. Attaches `cargo build` to `Build`, `cargo test` to
 `Test`, archiving to `Package`, and uploading release archives to `Publish`. Defines the public dotted
-targets `RustBinary.Check` (build, test and the Pester binary smoke tests) and `RustBinary.Package`
-(build and archive for a single `-Target`), used directly by CI matrix jobs.
+targets `RustBinary.Check` (build, test, the Pester binary smoke tests and `CheckForUncommittedChanges`)
+and `RustBinary.Package` (build and archive for a single `-Target`), used directly by CI matrix jobs.
 
 Supports a collector mode: when `-ArchiveSourceDirectory` is supplied, no `cargo` commands are invoked.
 Instead the archives already built by the `RustBinary.Package` matrix jobs are copied into the build
@@ -116,8 +116,8 @@ Parameters:
 ### ContainerImage.tasks.ps1
 
 Builds and publishes a Docker container image. Attaches the image build to `Build` and publishing to
-`Publish`. Defines the public dotted target `ContainerImage.Check` (build the image and run its Pester
-checks, without pushing).
+`Publish`. Defines the public dotted target `ContainerImage.Check` (build the image, run its Pester
+checks and `CheckForUncommittedChanges`, without pushing).
 
 Parameters:
 
